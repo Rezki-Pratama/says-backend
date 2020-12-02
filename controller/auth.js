@@ -1,9 +1,21 @@
-const { User} = require('../models')
+const { User,Token } = require('../models')
+const bcrypt = require('bcrypt')
+const config = require('../helper/generate')
+const jwt = require('jsonwebtoken')
+const ip = require('ip');
 
 exports.register =  async(req, res) => {
-            const { name, email, password } = req.body
+            const { name, email, password, role } = req.body
+            let salt = bcrypt.genSaltSync(10)
+            encriptPassword = bcrypt.hashSync(password, salt)
+            console.log(encriptPassword)
             try {
-                const user = await User.create({ name, email, password })
+                const user = await User.create({
+                     name : name, 
+                     email: email, 
+                     password: encriptPassword, 
+                     role: role 
+                })
             
                 return  res.json(user);
             
@@ -14,6 +26,53 @@ exports.register =  async(req, res) => {
 
             }
         }
+
+exports.login = async(req, res) => {
+    const { email, password } = req.body
+    try {
+
+        const user = await User.findOne({
+            where: { email }
+        })
+
+        if(user) {
+            console.log('from body'+password)
+            bcrypt.compare(password, user.password, async (err, hash) => {
+                if(hash) {
+                    let data = user.dataValues
+                    let token = jwt.sign({data}, config.secret,{
+                        expiresIn: 1440
+                    })
+
+                    const createToken = await Token.create({
+                        access_token : token, 
+                        email: email, 
+                        ip_address: ip.address(), 
+                        userId: user.id 
+                   })
+
+                   return  res.json({
+                       succes: true,
+                       message: "Generate token success !",
+                       token: token,
+                       uuid: user.uuid,
+                       user: user.name,
+                   });
+                }
+            })
+        } else {
+             res.json({
+                 error: "true",
+                 message: "Email anda tidak terdaftar !"
+             });
+        }
+
+        // console.log(user.dataValues)
+
+    } catch (error) {
+        return res.status(500).json(error);
+    }
+}
 
 exports.getAllUsers =  async(req, res) => {
             try {

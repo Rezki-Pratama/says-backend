@@ -12,6 +12,8 @@ module.exports = (sequelize, DataTypes) => {
     static associate({ Message }) {
       // define association here
       this.hasMany(Message, { foreignKey: 'userId', as: 'messages' })
+
+      this.hasMany(Message, { foreignKey: 'userId', as: 'tokens' })
     }
 
     toJSON(){
@@ -45,6 +47,14 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       validate: {
         notNull: { msg: 'User must have a name !' },
+        notEmpty: { msg: 'User must not empty !' }
+      }
+    },
+    role: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        notNull: { msg: 'User must have a role !' },
         notEmpty: { msg: 'User must not empty !' }
       }
     }

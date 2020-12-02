@@ -1,4 +1,28 @@
 const { User,Message } = require('../models')
+const socket = require('socket.io')
+
+
+const users = []
+
+module.exports = (socket) => {
+
+    let interval
+
+    if (interval) {
+        clearInterval(interval);
+      }
+      interval = setInterval(() => getApiAndEmit(socket), 1000);
+      socket.on("disconnect", () => {
+        console.log("Client disconnected");
+        clearInterval(interval);
+      });
+
+      const getApiAndEmit = socket => {
+        const response = new Date();
+        // Emitting a new message. Will be consumed by the client
+        socket.emit("FromAPI", response);
+      };
+}
 
 exports.createMessage = async(req, res) => {
             const { userUuid, sender, receiver, message } = req.body

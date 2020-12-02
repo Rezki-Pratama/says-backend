@@ -16,6 +16,7 @@ module.exports = {
       name: 'Rezki Pratama',
       email: 'rezki@gmail.com',
       password: '123',
+      role: 2,
       createdAt: '2020-12-01T04:33:06.946Z',
       updatedAt: '2020-12-01T06:41:41.336Z'
     },{
@@ -23,6 +24,7 @@ module.exports = {
       name: 'Anthony',
       email: 'anthony@gmail.com',
       password: '123',
+      role: 2,
       createdAt: '2020-12-01T04:33:06.946Z',
       updatedAt: '2020-12-01T06:41:41.336Z'
     }], {});
