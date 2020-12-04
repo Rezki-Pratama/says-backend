@@ -23,9 +23,11 @@ const server = app.listen({ port: 5000 }, async () => {
 
 const io = socket(server)
 
+const users = []
+
 io.on('connection', (socket)=>{
     console.log('User connected', socket.id)
 
-    require('./controller/message')(socket)
+    require('./controller/message')(socket, io, users)
 
 })

@@ -2,44 +2,48 @@ const { User,Message } = require('../models')
 const socket = require('socket.io')
 
 
-const users = []
+module.exports = (socket, io, users) => {
 
-module.exports = (socket) => {
+      socket.on('disconnect', (data) => {
+        console.log('User disconnect', data)
+      })
 
-    let interval
+      socket.on('user_connected', (username) => {
+          
+        users[username] = socket.id
+        //socked id will be used to send message to individual person
+       
+        //notify all connected clients
+        io.emit('user_connected', username)
+      })
 
-    if (interval) {
-        clearInterval(interval);
-      }
-      interval = setInterval(() => getApiAndEmit(socket), 1000);
-      socket.on("disconnect", () => {
-        console.log("Client disconnected");
-        clearInterval(interval);
-      });
+      socket.on('send_message', (data) => {
 
-      const getApiAndEmit = socket => {
-        const response = new Date();
-        // Emitting a new message. Will be consumed by the client
-        socket.emit("FromAPI", response);
-      };
-}
+        let sockedId = users[data.receiver]
+        
+        io.to(sockedId).emit('new_message', data)
 
-exports.createMessage = async(req, res) => {
-            const { userUuid, sender, receiver, message } = req.body
-            try {
-                const user = await User.findOne({ where: { uuid: userUuid } })
+        io.emit('new_message', data)
 
-                const messages = await Message.create({ sender, receiver, message, userId: user.id})
-
-                console.log(messages)
-
-                return  res.json(messages);
-            } catch (error) {
-                console.log(error)
-                return  res.status(500).json(error);
-
-            }
+        //Save in database
+        //cause req, res not available in socket.io, just do it like this
+        const user = async () => {
+          return await User.findOne({ where: { uuid: data.uuid } })
         }
+
+        user().then(user => {
+          Message.create({ 
+            sender: data.sender, 
+            receiver: data.receiver, 
+            message: data.message, 
+            userId: user.id 
+          })
+        }) 
+        
+      })
+
+      
+}
 
 exports.getMessage = async(req, res) => {
             try {
