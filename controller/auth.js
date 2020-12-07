@@ -52,17 +52,22 @@ exports.login = async(req, res) => {
                    })
 
                    return  res.json({
-                       succes: true,
+                       success: true,
                        message: "Generate token success !",
                        token: token,
                        uuid: user.uuid,
                        user: user.name,
                    });
+                } else {
+                    res.json({
+                        error: true,
+                        message: "Password anda Salah !"
+                    }); 
                 }
             })
         } else {
              res.json({
-                 error: "true",
+                 error: true,
                  message: "Email anda tidak terdaftar !"
              });
         }
